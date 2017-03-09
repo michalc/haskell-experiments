@@ -7,8 +7,8 @@ main = readFile "un.txt" >>= (
     filter (flip elem allowedCharacters) >>>
     map toLower >>>
     splitOn " " >>>
-    extractEvery 7 >>>
     zip [0..] >>>
+    filter (every 7) >>>
     map convertWord >>>
     concat >>>
     writeFile "un_every_7th.txt"
@@ -25,7 +25,7 @@ convertWord (i, word)
   | mod (i + 1) 15       == 0  = word ++ ",\n"
   | otherwise                  = word ++ " "
 
-extractEvery :: Int -> [String] -> [String]
-extractEvery m = map snd . filter (\(x,y) -> (mod x m) == 0) . zip [0..]
+every :: Int -> (Int, String) -> Bool
+every m (x, _) = (mod x m) == 0
 
 allowedCharacters = [' '] ++ ['a'..'z'] ++ ['A'..'Z'] ++ ['0'..'9']
