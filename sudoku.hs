@@ -1,3 +1,4 @@
+import Control.Lens
 import Control.Monad.Loops
 import Control.Monad.State.Strict
 import Data.List
@@ -33,20 +34,16 @@ isSolved :: State GridState Bool
 isSolved = get >>= return . all (((==) 1) . length)
 
 iteration :: State GridState [()]
-iteration = flip untilM isSolved $ do
-  mapM_ iterationSub $ map row    [0..8]
-  mapM_ iterationSub $ map column [0..8]
-  mapM_ iterationSub $ map cell   [(i,j) | i <- [0..2], j <- [0..2]]
-  where
-    row i       = (i, 0, i + 1, 9)
-    column i    = (0, i, 9, i + 1)
-    cell (i, j) = (i * 3, j * 3, (i+1) * 3, (j+1) * 3)
+iteration = flip untilM isSolved $ mapM_ iterationGroup groups
 
-iterationSub :: (Int, Int, Int, Int) -> State GridState ()
-iterationSub sub = modify $ \matrix ->
-  replaceSubmatrix sub matrix (reducePotentials $ submatrix sub matrix)
+groups :: [[Int]]
+groups = rows ++ columns ++ cells where
+  rows = chunksOf 9 [0..80]
+  columns = transpose rows
+  cells = concatMap (map concat . chunksOf 3) $ transpose $ map (chunksOf 3) columns
 
-
+iterationGroup :: [Int] -> State GridState ()
+iterationGroup is = partsOf (traversed . indices (`elem` is)) %= reducePotentials
 
 -- Dealing with "potentials" -- 
 
@@ -65,40 +62,3 @@ reducePotentials subMatrix = map (withoutPotential) subMatrix
 
 certains :: [[a]] -> [a]
 certains = map head . filter (((==) 1) . length)
-
-
---- Matrix / utilitiy operations ---
-
-replaceSubmatrix :: (Int, Int, Int, Int) -> [a] -> [a] -> [a]
-replaceSubmatrix (i, j, k, l) matrix newSubmatrix = map replace $ zip matrix [0..]
-  where
-    replace x_i
-      | isInSubmatrix (i, j, k, l) (snd x_i) = newSubmatrix !! (indexInSubmatrix $ snd x_i)
-      | otherwise                             = matrix       !! snd x_i
-    indexInSubmatrix  i_parent = ((rowInSubmatrix i_parent) * submatrixWidth) + columnInSubmatrix i_parent
-    rowInSubmatrix    i_parent = rowOfIndex    (i_parent - i * 9 - j)
-    columnInSubmatrix i_parent = columnOfIndex (i_parent - i * 9 - j)
-    submatrixWidth             = l - j
-    submatrixHeight            = k - i
-
-submatrix :: (Int, Int, Int, Int) -> [a] -> [a]
-submatrix (i, j, k, l) matrix = [
-    fst x_i | x_i <- zip matrix [0..], 
-    isInSubmatrix (i, j, k, l) $ snd x_i
-  ]
-
-isInSubmatrix :: (Int, Int, Int, Int) -> Int -> Bool
-isInSubmatrix (i, j, k, l) index = isBetween i k (rowOfIndex index) && isBetween j l (columnOfIndex index)
-
-rowOfIndex :: Int -> Int
-rowOfIndex i = i `quot` 9
-
-columnOfIndex :: Int -> Int
-columnOfIndex i = i `mod` 9
-
-cellOfIndex :: Int -> (Int, Int)
-cellOfIndex i = ((rowOfIndex i) `quot` 3, (columnOfIndex i) `quot` 3)
-
-isBetween :: Int -> Int -> Int -> Bool
-isBetween a b x = a <= x && x < b
-
