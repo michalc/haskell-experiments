@@ -33,11 +33,10 @@ niceString matrix = intercalate "\n" $ chunksOf 18 asStrings
   where
     asStrings = intercalate " " $ map (show . head) matrix
 
-isSolved :: State GridState Bool
-isSolved = get >>= return . all (((==) 1) . length)
-
 iteration :: State GridState [()]
 iteration = flip untilM isSolved $ mapM_ iterationGroup groups
+  where
+    isSolved = get >>= return . all (((==) 1) . length)
 
 groups :: [[Int]]
 groups = rows ++ columns ++ cells
