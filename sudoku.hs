@@ -30,7 +30,7 @@ niceString matrix = intercalate "\n" $ chunksOf 18 asStrings
     asStrings = intercalate " " $ map (show . head) matrix
 
 isNotSolved :: State GridState Bool
-isNotSolved = state $ \s -> (any (\xs -> length xs > 1) s, s)
+isNotSolved = get >>= \s -> return $ any (\xs -> length xs > 1) s
 
 iteration :: State GridState [()]
 iteration = whileM isNotSolved $ do
