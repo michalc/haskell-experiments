@@ -3,13 +3,6 @@ import Control.Monad.State.Strict
 import Data.List
 import Data.List.Split
 
--- Convert input cells to lists of potentials.
--- The known cells are lists of 1, the unknowns are lists of 1 to 9
--- First, they are all numbers 1 to 9
--- First pass at iteration loop
---- Go through each row and column, and cell, find all the ones that are certain, and remove those from tne others
---- For tricky ones, suspect it's not enough!
-
 type GridState = [[Int]]
 
 initial = [
