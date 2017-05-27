@@ -67,7 +67,7 @@ reducePotentials subMatrix = map (withoutPotential) subMatrix
     withoutPotential  xs = xs \\ (certains subMatrix)
 
 certains :: [[a]] -> [a]
-certains subMatrix = map head $ filter (((==) 1) . length) subMatrix
+certains = map head . filter (((==) 1) . length)
 
 
 --- Matrix / utilitiy operations ---
