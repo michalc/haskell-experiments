@@ -56,33 +56,9 @@ iteration = do
 
 iterationGrid :: State GridState ()
 iterationGrid = do
-  iterationRow 0
-  iterationRow 1
-  iterationRow 2
-  iterationRow 3
-  iterationRow 4
-  iterationRow 5
-  iterationRow 6
-  iterationRow 7
-  iterationRow 8
-  iterationColumn 0
-  iterationColumn 1
-  iterationColumn 2
-  iterationColumn 3
-  iterationColumn 4
-  iterationColumn 5
-  iterationColumn 6
-  iterationColumn 7
-  iterationColumn 8
-  iterationCell (0, 0)
-  iterationCell (1, 0)
-  iterationCell (2, 0)
-  iterationCell (0, 1)
-  iterationCell (1, 1)
-  iterationCell (2, 1)
-  iterationCell (0, 2)
-  iterationCell (1, 2)
-  iterationCell (2, 2)
+  foldM (\_ -> iterationRow) () [0..8]
+  foldM (\_ -> iterationColumn) () [0..8]
+  foldM (\_ -> iterationCell) () [(i,j) | i <- [0..2], j <- [0..2]]
 
 iterationRow :: Int -> State GridState ()
 iterationRow i = do
@@ -119,7 +95,7 @@ certains :: [[a]] -> [a]
 certains subMatrix = map (\ xs -> xs !! 0) $ filter (\xs -> length xs == 1) subMatrix
 
 
---- Matrix / utilitiy Operations ---
+--- Matrix / utilitiy operations ---
 
 row :: Int -> [a] -> [a]
 row i matrix = [fst x_i | x_i <- indexed, rowOfIndex (snd x_i) == i]
