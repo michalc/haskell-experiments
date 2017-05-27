@@ -23,7 +23,10 @@ initial = [
 
 
 main :: IO ()
-main = putStrLn $ niceString $ snd $ runState iteration $ toPotentials initial
+main = putStrLn $ niceString $ snd $ runState iteration $ map toPotential initial
+  where
+    toPotential Nothing  = [1..9]
+    toPotential (Just x) = [x]
 
 niceString :: [[Int]] -> String
 niceString matrix = intercalate "\n" $ chunksOf 18 asStrings
@@ -44,15 +47,6 @@ groups = rows ++ columns ++ cells where
 
 iterationGroup :: [Int] -> State GridState ()
 iterationGroup is = partsOf (traversed . indices (`elem` is)) %= reducePotentials
-
--- Dealing with "potentials" -- 
-
-toPotentials :: [Maybe Int] -> [[Int]]
-toPotentials matrix = map toPotential matrix
-
-toPotential :: Maybe Int -> [Int]
-toPotential Nothing  = [1..9]
-toPotential (Just x) = [x]
 
 reducePotentials :: (Eq a) => [[a]] -> [[a]]
 reducePotentials subMatrix = map (withoutPotential) subMatrix 
