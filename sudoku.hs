@@ -40,15 +40,15 @@ iteration = flip untilM isSolved $ do
 
 iterationRow :: Int -> State GridState ()
 iterationRow i = modify $ \matrix 
-  -> replaceRow i matrix (reducePotentials $ row i matrix)
+  -> replaceSubmatrix (i, 0) (i + 1, 9) matrix (reducePotentials $ row i matrix)
 
 iterationColumn :: Int -> State GridState ()
 iterationColumn i = modify $ \matrix 
-  -> replaceColumn i matrix (reducePotentials $ column i matrix)
+  -> replaceSubmatrix (0, i) (9, i + 1) matrix (reducePotentials $ column i matrix)
 
 iterationCell :: (Int, Int) -> State GridState ()
 iterationCell (i, j) = modify $ \matrix
-  -> replaceCell (i,j) matrix (reducePotentials $ cell (i,j) matrix)
+  -> replaceSubmatrix (i * 3, j * 3) ((i+1) * 3, (j+1) * 3) matrix (reducePotentials $ cell (i,j) matrix)
 
 
 -- Dealing with "potentials" -- 
@@ -71,15 +71,6 @@ certains = map head . filter (((==) 1) . length)
 
 
 --- Matrix / utilitiy operations ---
-
-replaceRow :: Int -> [a] -> [a] -> [a]
-replaceRow i matrix newRow = replaceSubmatrix (i, 0) (i + 1, 9) matrix newRow
-
-replaceColumn :: Int -> [a] -> [a] -> [a]
-replaceColumn i matrix newColumn = replaceSubmatrix (0, i) (9, i + 1) matrix newColumn
-
-replaceCell :: (Int, Int) -> [a] -> [a] -> [a]
-replaceCell (i, j) matrix newCell = replaceSubmatrix (i * 3, j * 3) ((i+1) * 3, (j+1) * 3) matrix newCell
 
 replaceSubmatrix :: (Int, Int) -> (Int, Int) -> [a] -> [a] -> [a]
 replaceSubmatrix (i, j) (k, l) matrix newSubmatrix = map replace $ zip matrix [0..]
