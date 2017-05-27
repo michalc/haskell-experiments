@@ -12,7 +12,7 @@ type GridState = [[Int]]
 
 initial = [
     Nothing, Nothing,  Just 3,   Nothing, Nothing,  Just 7,    Just 1, Nothing, Nothing,
-    Nothing,  Just 1,  Just 1,   Nothing,  Just 2, Nothing,   Nothing, Nothing,  Just 5,
+    Nothing,  Just 4,  Just 1,   Nothing,  Just 2, Nothing,   Nothing, Nothing,  Just 5,
      Just 9, Nothing,  Just 6,   Nothing,  Just 5,  Just 1,    Just 2,  Just 3, Nothing,
 
      Just 6, Nothing, Nothing,    Just 5,  Just 8, Nothing,    Just 9, Nothing, Nothing,
@@ -58,11 +58,7 @@ iteration = do
   iterationGrid
   iterationGrid
   iterationGrid
-  iterationGrid
-  iterationGrid
-  iterationGrid
-  iterationGrid
-  iterationGrid
+
 
 iterationGrid :: State GridState ()
 iterationGrid = do
@@ -92,7 +88,7 @@ iterationGrid = do
   iterationCell (2, 1)
   iterationCell (0, 2)
   iterationCell (1, 2)
-  iterationCell (2, 3)
+  iterationCell (2, 2)
 
 
 iterationRow :: Int -> State GridState ()
@@ -124,7 +120,7 @@ reducePotentials :: (Eq a) => [[a]] -> [[a]]
 reducePotentials subMatrix = map (withoutPotential) subMatrix 
   where
     withoutPotential [x] = [x]
-    withoutPotential  xs = xs \\ certains subMatrix
+    withoutPotential  xs = xs \\ (certains subMatrix)
 
 certains :: [[a]] -> [a]
 certains subMatrix = map (\ xs -> xs !! 0) $ filter (\xs -> length xs == 1) subMatrix
@@ -159,7 +155,7 @@ replaceCell (i, j) matrix newCell = map replace indexed
     indexed = zip matrix [0..]
     replace x_i
       | cellOfIndex (snd x_i) == (i, j) = newCell !! (indexInNewCell $ snd x_i)
-      | otherwise                   = matrix  !! snd x_i
+      | otherwise                       = matrix  !! snd x_i
 
     indexInNewCell i_parent = (rowInCell i_parent) * 3 + columnInCell i_parent 
     rowInCell      i_parent = (i_parent - i * 9 * 3) `quot` 9
