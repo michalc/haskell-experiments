@@ -29,11 +29,11 @@ niceString matrix = intercalate "\n" $ chunksOf 18 asStrings
   where
     asStrings = intercalate " " $ map (show . head) matrix
 
-isNotSolved :: State GridState Bool
-isNotSolved = get >>= return . any (((<) 1) . length)
+isSolved :: State GridState Bool
+isSolved = get >>= return . all (((==) 1) . length)
 
 iteration :: State GridState [()]
-iteration = whileM isNotSolved $ do
+iteration = flip untilM isSolved $ do
   foldM (\_ -> iterationRow) () [0..8]
   foldM (\_ -> iterationColumn) () [0..8]
   foldM (\_ -> iterationCell) () [(i,j) | i <- [0..2], j <- [0..2]]
