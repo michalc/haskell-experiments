@@ -1,6 +1,7 @@
 import Control.Monad.Loops
 import Control.Monad.State.Strict
 import Data.List
+import Data.List.Split
 
 -- Convert input cells to lists of potentials.
 -- The known cells are lists of 1, the unknowns are lists of 1 to 9
@@ -28,7 +29,12 @@ initial = [
 
 
 main :: IO ()
-main = putStrLn $ show $ snd $ runState iteration $ toPotentials initial
+main = putStrLn $ niceString $ snd $ runState iteration $ toPotentials initial
+
+niceString :: [[Int]] -> String
+niceString matrix = intercalate "\n" $ chunksOf 18 asStrings
+  where
+    asStrings = intercalate " " $ map (show . head) matrix
 
 getRowInState :: Int -> State GridState [[Int]]
 getRowInState i = state $ \s -> (row i s, s)
@@ -84,7 +90,6 @@ iterationGrid = do
   iterationCell (0, 2)
   iterationCell (1, 2)
   iterationCell (2, 2)
-
 
 iterationRow :: Int -> State GridState ()
 iterationRow i = do
