@@ -34,27 +34,19 @@ isSolved = get >>= return . all (((==) 1) . length)
 
 iteration :: State GridState [()]
 iteration = flip untilM isSolved $ do
-  mapM_ iterationRow [0..8]
-  mapM_ iterationColumn [0..8]
-  mapM_ iterationCell [(i,j) | i <- [0..2], j <- [0..2]]
-
-iterationRow :: Int -> State GridState ()
-iterationRow i = modify $ \matrix ->
-  replaceSubmatrix sub matrix (reducePotentials $ submatrix sub matrix)
+  mapM_ iterationSub $ map row    [0..8]
+  mapM_ iterationSub $ map column [0..8]
+  mapM_ iterationSub $ map cell   [(i,j) | i <- [0..2], j <- [0..2]]
   where
-    sub = (i, 0, i + 1, 9)
+    row i       = (i, 0, i + 1, 9)
+    column i    = (0, i, 9, i + 1)
+    cell (i, j) = (i * 3, j * 3, (i+1) * 3, (j+1) * 3)
 
-iterationColumn :: Int -> State GridState ()
-iterationColumn i = modify $ \matrix ->
+iterationSub :: (Int, Int, Int, Int) -> State GridState ()
+iterationSub sub = modify $ \matrix ->
   replaceSubmatrix sub matrix (reducePotentials $ submatrix sub matrix)
-  where
-    sub = (0, i, 9, i + 1)
 
-iterationCell :: (Int, Int) -> State GridState ()
-iterationCell (i, j) = modify $ \matrix ->
-  replaceSubmatrix sub matrix (reducePotentials $ submatrix sub matrix)
-  where
-    sub = (i * 3, j * 3, (i+1) * 3, (j+1) * 3)
+
 
 -- Dealing with "potentials" -- 
 
