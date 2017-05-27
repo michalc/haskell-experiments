@@ -40,24 +40,21 @@ iteration = flip untilM isSolved $ do
 
 iterationRow :: Int -> State GridState ()
 iterationRow i = modify $ \matrix ->
-  replaceSubmatrix sub_tl sub_br matrix (reducePotentials $ submatrix sub_tl sub_br matrix)
+  replaceSubmatrix sub matrix (reducePotentials $ submatrix sub matrix)
   where
-    sub_tl = (i, 0)
-    sub_br = (i + 1, 9)
+    sub = (i, 0, i + 1, 9)
 
 iterationColumn :: Int -> State GridState ()
 iterationColumn i = modify $ \matrix ->
-  replaceSubmatrix  sub_tl sub_br matrix (reducePotentials $ submatrix  sub_tl sub_br matrix)
+  replaceSubmatrix sub matrix (reducePotentials $ submatrix sub matrix)
   where
-    sub_tl = (0, i)
-    sub_br = (9, i + 1)
+    sub = (0, i, 9, i + 1)
 
 iterationCell :: (Int, Int) -> State GridState ()
 iterationCell (i, j) = modify $ \matrix ->
-  replaceSubmatrix sub_tl sub_br matrix (reducePotentials $ submatrix sub_tl sub_br matrix)
+  replaceSubmatrix sub matrix (reducePotentials $ submatrix sub matrix)
   where
-    sub_tl = (i * 3, j * 3)
-    sub_br = ((i+1) * 3, (j+1) * 3)
+    sub = (i * 3, j * 3, (i+1) * 3, (j+1) * 3)
 
 -- Dealing with "potentials" -- 
 
@@ -80,11 +77,11 @@ certains = map head . filter (((==) 1) . length)
 
 --- Matrix / utilitiy operations ---
 
-replaceSubmatrix :: (Int, Int) -> (Int, Int) -> [a] -> [a] -> [a]
-replaceSubmatrix (i, j) (k, l) matrix newSubmatrix = map replace $ zip matrix [0..]
+replaceSubmatrix :: (Int, Int, Int, Int) -> [a] -> [a] -> [a]
+replaceSubmatrix (i, j, k, l) matrix newSubmatrix = map replace $ zip matrix [0..]
   where
     replace x_i
-      | isInSubmatrix (i, j) (k, l) (snd x_i) = newSubmatrix !! (indexInSubmatrix $ snd x_i)
+      | isInSubmatrix (i, j, k, l) (snd x_i) = newSubmatrix !! (indexInSubmatrix $ snd x_i)
       | otherwise                             = matrix       !! snd x_i
     indexInSubmatrix  i_parent = ((rowInSubmatrix i_parent) * submatrixWidth) + columnInSubmatrix i_parent
     rowInSubmatrix    i_parent = rowOfIndex    (i_parent - i * 9 - j)
@@ -92,14 +89,14 @@ replaceSubmatrix (i, j) (k, l) matrix newSubmatrix = map replace $ zip matrix [0
     submatrixWidth             = l - j
     submatrixHeight            = k - i
 
-submatrix :: (Int, Int) -> (Int, Int) -> [a] -> [a]
-submatrix (i,j) (k, l) matrix = [
+submatrix :: (Int, Int, Int, Int) -> [a] -> [a]
+submatrix (i, j, k, l) matrix = [
     fst x_i | x_i <- zip matrix [0..], 
-    isInSubmatrix (i, j) (k, l) $ snd x_i
+    isInSubmatrix (i, j, k, l) $ snd x_i
   ]
 
-isInSubmatrix :: (Int, Int) -> (Int, Int) -> Int -> Bool
-isInSubmatrix (i,j) (k, l) index = isBetween i k (rowOfIndex index) && isBetween j l (columnOfIndex index)
+isInSubmatrix :: (Int, Int, Int, Int) -> Int -> Bool
+isInSubmatrix (i, j, k, l) index = isBetween i k (rowOfIndex index) && isBetween j l (columnOfIndex index)
 
 rowOfIndex :: Int -> Int
 rowOfIndex i = i `quot` 9
