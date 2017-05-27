@@ -72,35 +72,26 @@ certains = map head . filter (((==) 1) . length)
 
 --- Matrix / utilitiy operations ---
 
-
-
 replaceRow :: Int -> [a] -> [a] -> [a]
-replaceRow i matrix newRow = map replace indexed
-  where
-    indexed = zip matrix [0..]
-    replace x_i
-      | rowOfIndex (snd x_i) == i = newRow !! (columnOfIndex $ snd x_i)
-      | otherwise                 = matrix !! snd x_i
+replaceRow i matrix newRow = replaceSubmatrix (i, 0) (i + 1, 9) matrix newRow
 
 replaceColumn :: Int -> [a] -> [a] -> [a]
-replaceColumn i matrix newColumn = map replace indexed
-  where
-    indexed = zip matrix [0..]
-    replace x_i
-      | columnOfIndex (snd x_i) == i = newColumn !! (rowOfIndex $ snd x_i)
-      | otherwise                    = matrix    !! snd x_i
+replaceColumn i matrix newColumn = replaceSubmatrix (0, i) (9, i + 1) matrix newColumn
 
 replaceCell :: (Int, Int) -> [a] -> [a] -> [a]
-replaceCell (i, j) matrix newCell = map replace indexed
-  where
-    indexed = zip matrix [0..]
-    replace x_i
-      | cellOfIndex (snd x_i) == (i, j) = newCell !! (indexInNewCell $ snd x_i)
-      | otherwise                       = matrix  !! snd x_i
+replaceCell (i, j) matrix newCell = replaceSubmatrix (i * 3, j * 3) ((i+1) * 3, (j+1) * 3) matrix newCell
 
-    indexInNewCell i_parent = (rowInCell i_parent) * 3 + columnInCell i_parent 
-    rowInCell      i_parent = (i_parent - i * 9 * 3) `quot` 9
-    columnInCell   i_parent = i_parent `mod` 3
+replaceSubmatrix :: (Int, Int) -> (Int, Int) -> [a] -> [a] -> [a]
+replaceSubmatrix (i, j) (k, l) matrix newSubmatrix = map replace $ zip matrix [0..]
+  where
+    replace x_i
+      | isInSubmatrix (i, j) (k, l) (snd x_i) = newSubmatrix !! (indexInSubmatrix $ snd x_i)
+      | otherwise                             = matrix       !! snd x_i
+    indexInSubmatrix  i_parent = ((rowInSubmatrix i_parent) * submatrixWidth) + columnInSubmatrix i_parent
+    rowInSubmatrix    i_parent = rowOfIndex    (i_parent - i * 9 - j)
+    columnInSubmatrix i_parent = columnOfIndex (i_parent - i * 9 - j)
+    submatrixWidth             = l - j
+    submatrixHeight            = k - i
 
 row :: Int -> [a] -> [a]
 row i matrix = submatrix (i, 0) (i + 1, 9) matrix
@@ -114,8 +105,11 @@ cell (i, j) matrix = submatrix (i * 3, j * 3) ((i+1) * 3, (j+1) * 3) matrix
 submatrix :: (Int, Int) -> (Int, Int) -> [a] -> [a]
 submatrix (i,j) (k, l) matrix = [
     fst x_i | x_i <- zip matrix [0..], 
-    isBetween i k (rowOfIndex (snd x_i)) && isBetween j l (columnOfIndex (snd x_i))
+    isInSubmatrix (i, j) (k, l) $ snd x_i
   ]
+
+isInSubmatrix :: (Int, Int) -> (Int, Int) -> Int -> Bool
+isInSubmatrix (i,j) (k, l) index = isBetween i k (rowOfIndex index) && isBetween j l (columnOfIndex index)
 
 rowOfIndex :: Int -> Int
 rowOfIndex i = i `quot` 9
