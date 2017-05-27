@@ -51,11 +51,7 @@ isNotSolved :: State GridState Bool
 isNotSolved = state $ \s -> (any (\xs -> length xs > 1) s, s)
 
 iteration :: State GridState [()]
-iteration = do
-  whileM isNotSolved iterationGrid
-
-iterationGrid :: State GridState ()
-iterationGrid = do
+iteration = whileM isNotSolved $ do
   foldM (\_ -> iterationRow) () [0..8]
   foldM (\_ -> iterationColumn) () [0..8]
   foldM (\_ -> iterationCell) () [(i,j) | i <- [0..2], j <- [0..2]]
