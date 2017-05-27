@@ -144,6 +144,3 @@ columnOfIndex i = i `mod` 9
 
 cellOfIndex :: Int -> (Int, Int)
 cellOfIndex i = ((rowOfIndex i) `quot` 3, (columnOfIndex i) `quot` 3)
-
-isBetween :: Int -> Int -> Int -> Bool
-isBetween a b x = a <= x && x < b
