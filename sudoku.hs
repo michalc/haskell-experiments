@@ -29,24 +29,6 @@ niceString matrix = intercalate "\n" $ chunksOf 18 asStrings
   where
     asStrings = intercalate " " $ map (show . head) matrix
 
-getRowInState :: Int -> State GridState [[Int]]
-getRowInState i = state $ \s -> (row i s, s)
-
-replaceRowInState :: Int -> [[Int]] -> State GridState ()
-replaceRowInState i newRow = state $ \s -> ((), replaceRow i s newRow)
-
-getColumnInState :: Int -> State GridState [[Int]]
-getColumnInState i = state $ \s -> (column i s, s)
-
-replaceColumnInState :: Int -> [[Int]] -> State GridState ()
-replaceColumnInState i newColumn = state $ \s -> ((), replaceColumn i s newColumn)
-
-getCellInState :: (Int, Int) -> State GridState [[Int]]
-getCellInState (i,j) = state $ \s -> (cell (i,j) s, s)
-
-replaceCellInState :: (Int, Int) -> [[Int]] -> State GridState ()
-replaceCellInState (i,j) newCell = state $ \s -> ((), replaceCell (i,j) s newCell)
-
 isNotSolved :: State GridState Bool
 isNotSolved = state $ \s -> (any (\xs -> length xs > 1) s, s)
 
@@ -57,19 +39,16 @@ iteration = whileM isNotSolved $ do
   foldM (\_ -> iterationCell) () [(i,j) | i <- [0..2], j <- [0..2]]
 
 iterationRow :: Int -> State GridState ()
-iterationRow i = do
-  row <- getRowInState i
-  replaceRowInState i $ reducePotentials row
+iterationRow i = modify $ \matrix 
+  -> replaceRow i matrix (reducePotentials $ row i matrix)
 
 iterationColumn :: Int -> State GridState ()
-iterationColumn i = do
-  column <- getColumnInState i
-  replaceColumnInState i $ reducePotentials column
+iterationColumn i = modify $ \matrix 
+  -> replaceColumn i matrix (reducePotentials $ column i matrix)
 
 iterationCell :: (Int, Int) -> State GridState ()
-iterationCell (i, j) = do
-  cell <- getCellInState (i,j)
-  replaceCellInState (i,j) $ reducePotentials cell
+iterationCell (i, j) = modify $ \matrix
+  -> replaceCell (i,j) matrix (reducePotentials $ cell (i,j) matrix)
 
 
 -- Dealing with "potentials" -- 
