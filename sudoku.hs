@@ -1,3 +1,4 @@
+import Control.Monad.Loops
 import Control.Monad.State.Strict
 import Data.List
 
@@ -29,9 +30,6 @@ initial = [
 main :: IO ()
 main = putStrLn $ show $ snd $ runState iteration $ toPotentials initial
 
-nothing :: i -> State GridState ()
-nothing i = state $ \s -> ((), s)
-
 getRowInState :: Int -> State GridState [[Int]]
 getRowInState i = state $ \s -> (row i s, s)
 
@@ -50,15 +48,12 @@ getCellInState (i,j) = state $ \s -> (cell (i,j) s, s)
 replaceCellInState :: (Int, Int) -> [[Int]] -> State GridState ()
 replaceCellInState (i,j) newCell = state $ \s -> ((), replaceCell (i,j) s newCell)
 
-iteration :: State GridState ()
-iteration = do
-  iterationGrid
-  iterationGrid
-  iterationGrid
-  iterationGrid
-  iterationGrid
-  iterationGrid
+isNotSolved :: State GridState Bool
+isNotSolved = state $ \s -> (any (\xs -> length xs > 1) s, s)
 
+iteration :: State GridState [()]
+iteration = do
+  whileM isNotSolved iterationGrid
 
 iterationGrid :: State GridState ()
 iterationGrid = do
