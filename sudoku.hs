@@ -72,10 +72,7 @@ certains = map head . filter (((==) 1) . length)
 
 --- Matrix / utilitiy operations ---
 
-row :: Int -> [a] -> [a]
-row i matrix = [fst x_i | x_i <- indexed, rowOfIndex (snd x_i) == i]
-  where
-    indexed = zip matrix [0..]
+
 
 replaceRow :: Int -> [a] -> [a] -> [a]
 replaceRow i matrix newRow = map replace indexed
@@ -105,15 +102,20 @@ replaceCell (i, j) matrix newCell = map replace indexed
     rowInCell      i_parent = (i_parent - i * 9 * 3) `quot` 9
     columnInCell   i_parent = i_parent `mod` 3
 
+row :: Int -> [a] -> [a]
+row i matrix = submatrix (i, 0) (i + 1, 9) matrix
+
 column :: Int -> [a] -> [a]
-column i matrix = [fst x_i | x_i <- indexed, columnOfIndex (snd x_i) == i]
-  where
-    indexed = zip matrix [0..]
+column i matrix = submatrix (0, i) (9, i + 1) matrix
 
 cell :: (Int, Int) -> [a] -> [a]
-cell (i,j) matrix = [fst x_i | x_i <- indexed, cellOfIndex (snd x_i) == (i, j)]
-  where
-    indexed = zip matrix [0..]
+cell (i, j) matrix = submatrix (i * 3, j * 3) ((i+1) * 3, (j+1) * 3) matrix
+
+submatrix :: (Int, Int) -> (Int, Int) -> [a] -> [a]
+submatrix (i,j) (k, l) matrix = [
+    fst x_i | x_i <- zip matrix [0..], 
+    isBetween i k (rowOfIndex (snd x_i)) && isBetween j l (columnOfIndex (snd x_i))
+  ]
 
 rowOfIndex :: Int -> Int
 rowOfIndex i = i `quot` 9
@@ -123,3 +125,7 @@ columnOfIndex i = i `mod` 9
 
 cellOfIndex :: Int -> (Int, Int)
 cellOfIndex i = ((rowOfIndex i) `quot` 3, (columnOfIndex i) `quot` 3)
+
+isBetween :: Int -> Int -> Int -> Bool
+isBetween a b x = a <= x && x < b
+
