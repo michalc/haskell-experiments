@@ -38,11 +38,77 @@ getRowInState i = state $ \s -> (row i s, s)
 replaceRowInState :: Int -> [[Int]] -> State GridState ()
 replaceRowInState i newRow = state $ \s -> ((), replaceRow i s newRow)
 
+getColumnInState :: Int -> State GridState [[Int]]
+getColumnInState i = state $ \s -> (column i s, s)
+
+replaceColumnInState :: Int -> [[Int]] -> State GridState ()
+replaceColumnInState i newColumn = state $ \s -> ((), replaceColumn i s newColumn)
+
+getCellInState :: (Int, Int) -> State GridState [[Int]]
+getCellInState (i,j) = state $ \s -> (cell (i,j) s, s)
+
+replaceCellInState :: (Int, Int) -> [[Int]] -> State GridState ()
+replaceCellInState (i,j) newCell = state $ \s -> ((), replaceCell (i,j) s newCell)
+
 iteration :: State GridState ()
 iteration = do
-  row <- getRowInState 0
-  replaceRowInState 0 $ reducePotentials row
-  nothing 1
+  iterationGrid
+  iterationGrid
+  iterationGrid
+  iterationGrid
+  iterationGrid
+  iterationGrid
+  iterationGrid
+  iterationGrid
+  iterationGrid
+  iterationGrid
+  iterationGrid
+
+iterationGrid :: State GridState ()
+iterationGrid = do
+  iterationRow 0
+  iterationRow 1
+  iterationRow 2
+  iterationRow 3
+  iterationRow 4
+  iterationRow 5
+  iterationRow 6
+  iterationRow 7
+  iterationRow 8
+  iterationColumn 0
+  iterationColumn 1
+  iterationColumn 2
+  iterationColumn 3
+  iterationColumn 4
+  iterationColumn 5
+  iterationColumn 6
+  iterationColumn 7
+  iterationColumn 8
+  iterationCell (0, 0)
+  iterationCell (1, 0)
+  iterationCell (2, 0)
+  iterationCell (0, 1)
+  iterationCell (1, 1)
+  iterationCell (2, 1)
+  iterationCell (0, 2)
+  iterationCell (1, 2)
+  iterationCell (2, 3)
+
+
+iterationRow :: Int -> State GridState ()
+iterationRow i = do
+  row <- getRowInState i
+  replaceRowInState i $ reducePotentials row
+
+iterationColumn :: Int -> State GridState ()
+iterationColumn i = do
+  column <- getColumnInState i
+  replaceColumnInState i $ reducePotentials column
+
+iterationCell :: (Int, Int) -> State GridState ()
+iterationCell (i, j) = do
+  cell <- getCellInState (i,j)
+  replaceCellInState (i,j) $ reducePotentials cell
 
 
 -- Dealing with "potentials" -- 
@@ -87,18 +153,25 @@ replaceColumn i matrix newColumn = map replace indexed
       | columnOfIndex (snd x_i) == i = newColumn !! (rowOfIndex $ snd x_i)
       | otherwise                    = matrix    !! snd x_i
 
+replaceCell :: (Int, Int) -> [a] -> [a] -> [a]
+replaceCell (i, j) matrix newCell = map replace indexed
+  where
+    indexed = zip matrix [0..]
+    replace x_i
+      | cellOfIndex (snd x_i) == (i, j) = newCell !! (indexInNewCell $ snd x_i)
+      | otherwise                   = matrix  !! snd x_i
+
+    indexInNewCell i_parent = (rowInCell i_parent) * 3 + columnInCell i_parent 
+    rowInCell      i_parent = (i_parent - i * 9 * 3) `quot` 9
+    columnInCell   i_parent = i_parent `mod` 3
+
 column :: Int -> [a] -> [a]
 column i matrix = [fst x_i | x_i <- indexed, columnOfIndex (snd x_i) == i]
   where
     indexed = zip matrix [0..]
 
-cell :: Int -> Int -> [a] -> [a]
-cell i j matrix = [
-    fst x_i |
-    x_i <- indexed,
-    isBetween (i * 3) ((i + 1) * 3) (rowOfIndex (snd x_i)) 
-    && isBetween (i * 3) ((i + 1) * 3) (columnOfIndex (snd x_i)) 
-  ]
+cell :: (Int, Int) -> [a] -> [a]
+cell (i,j) matrix = [fst x_i | x_i <- indexed, cellOfIndex (snd x_i) == (i, j)]
   where
     indexed = zip matrix [0..]
 
@@ -107,6 +180,9 @@ rowOfIndex i = i `quot` 9
 
 columnOfIndex :: Int -> Int
 columnOfIndex i = i `mod` 9
+
+cellOfIndex :: Int -> (Int, Int)
+cellOfIndex i = ((rowOfIndex i) `quot` 3, (columnOfIndex i) `quot` 3)
 
 isBetween :: Int -> Int -> Int -> Bool
 isBetween a b x = a <= x && x < b
