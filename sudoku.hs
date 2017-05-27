@@ -58,7 +58,4 @@ reducePotentials :: (Eq a) => [[a]] -> [[a]]
 reducePotentials subMatrix = map (withoutPotential) subMatrix 
   where
     withoutPotential [x] = [x]
-    withoutPotential  xs = xs \\ (certains subMatrix)
-
-certains :: [[a]] -> [a]
-certains = map head . filter (((==) 1) . length)
+    withoutPotential  xs = xs \\ [x | [x] <- subMatrix]
