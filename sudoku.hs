@@ -39,17 +39,25 @@ iteration = flip untilM isSolved $ do
   foldM (\_ -> iterationCell) () [(i,j) | i <- [0..2], j <- [0..2]]
 
 iterationRow :: Int -> State GridState ()
-iterationRow i = modify $ \matrix 
-  -> replaceSubmatrix (i, 0) (i + 1, 9) matrix (reducePotentials $ row i matrix)
+iterationRow i = modify $ \matrix ->
+  replaceSubmatrix sub_tl sub_br matrix (reducePotentials $ submatrix sub_tl sub_br matrix)
+  where
+    sub_tl = (i, 0)
+    sub_br = (i + 1, 9)
 
 iterationColumn :: Int -> State GridState ()
-iterationColumn i = modify $ \matrix 
-  -> replaceSubmatrix (0, i) (9, i + 1) matrix (reducePotentials $ column i matrix)
+iterationColumn i = modify $ \matrix ->
+  replaceSubmatrix  sub_tl sub_br matrix (reducePotentials $ submatrix  sub_tl sub_br matrix)
+  where
+    sub_tl = (0, i)
+    sub_br = (9, i + 1)
 
 iterationCell :: (Int, Int) -> State GridState ()
-iterationCell (i, j) = modify $ \matrix
-  -> replaceSubmatrix (i * 3, j * 3) ((i+1) * 3, (j+1) * 3) matrix (reducePotentials $ cell (i,j) matrix)
-
+iterationCell (i, j) = modify $ \matrix ->
+  replaceSubmatrix sub_tl sub_br matrix (reducePotentials $ submatrix sub_tl sub_br matrix)
+  where
+    sub_tl = (i * 3, j * 3)
+    sub_br = ((i+1) * 3, (j+1) * 3)
 
 -- Dealing with "potentials" -- 
 
@@ -83,15 +91,6 @@ replaceSubmatrix (i, j) (k, l) matrix newSubmatrix = map replace $ zip matrix [0
     columnInSubmatrix i_parent = columnOfIndex (i_parent - i * 9 - j)
     submatrixWidth             = l - j
     submatrixHeight            = k - i
-
-row :: Int -> [a] -> [a]
-row i matrix = submatrix (i, 0) (i + 1, 9) matrix
-
-column :: Int -> [a] -> [a]
-column i matrix = submatrix (0, i) (9, i + 1) matrix
-
-cell :: (Int, Int) -> [a] -> [a]
-cell (i, j) matrix = submatrix (i * 3, j * 3) ((i+1) * 3, (j+1) * 3) matrix
 
 submatrix :: (Int, Int) -> (Int, Int) -> [a] -> [a]
 submatrix (i,j) (k, l) matrix = [
