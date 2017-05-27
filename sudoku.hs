@@ -40,10 +40,11 @@ iteration :: State GridState [()]
 iteration = flip untilM isSolved $ mapM_ iterationGroup groups
 
 groups :: [[Int]]
-groups = rows ++ columns ++ cells where
-  rows = chunksOf 9 [0..80]
-  columns = transpose rows
-  cells = concatMap (map concat . chunksOf 3) $ transpose $ map (chunksOf 3) columns
+groups = rows ++ columns ++ cells
+  where
+    rows = chunksOf 9 [0..80]
+    columns = transpose rows
+    cells = concatMap (map concat . chunksOf 3) $ transpose $ map (chunksOf 3) columns
 
 iterationGroup :: [Int] -> State GridState ()
 iterationGroup is = partsOf (traversed . indices (`elem` is)) %= reducePotentials
