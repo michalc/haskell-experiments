@@ -34,9 +34,9 @@ isSolved = get >>= return . all (((==) 1) . length)
 
 iteration :: State GridState [()]
 iteration = flip untilM isSolved $ do
-  foldM (\_ -> iterationRow) () [0..8]
-  foldM (\_ -> iterationColumn) () [0..8]
-  foldM (\_ -> iterationCell) () [(i,j) | i <- [0..2], j <- [0..2]]
+  mapM_ iterationRow [0..8]
+  mapM_ iterationColumn [0..8]
+  mapM_ iterationCell [(i,j) | i <- [0..2], j <- [0..2]]
 
 iterationRow :: Int -> State GridState ()
 iterationRow i = modify $ \matrix ->
