@@ -28,7 +28,7 @@ initial = [
 main :: IO ()
 main = putStrLn $ niceString $ snd $ runState iteration $ map toPotential initial
   where
-    toPotential Nothing  = [S1, S2, S3, S4, S5, S6, S7, S8, S9]
+    toPotential Nothing  = [S1 ..]
     toPotential (Just x) = [x]
 
 niceString :: [[SudokuValue]] -> String
