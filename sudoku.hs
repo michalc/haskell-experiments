@@ -7,7 +7,7 @@ import Data.Maybe
 
 data SudokuValue = S1 | S2 | S3 | S4 | S5 | S6 | S7 | S8 | S9 deriving (Eq, Enum)
 instance Show SudokuValue where
-  show s = show $ (fromJust (s `elemIndex` [S1 ..])) + 1
+  show s = show $ fromJust (s `elemIndex` [S1 ..]) + 1
 
 type MatrixIndex = Int
 
