@@ -26,7 +26,7 @@ initial = [
   ]
 
 main :: IO ()
-main = putStrLn $ niceString $ snd $ runState iteration $ map toPotential initial
+main = putStrLn $ niceString $ execState iteration $ map toPotential initial
   where
     toPotential Nothing  = [S1 ..]
     toPotential (Just x) = [x]
