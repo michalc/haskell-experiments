@@ -40,7 +40,7 @@ iteration :: State [[SudokuValue]] ()
 iteration = flip untilM_ isSolved $ mapM_ iterationGroup groups
   where
     iterationGroup matrix = partsOf (traversed . indices (`elem` matrix)) %= reducePotentials
-    isSolved = fmap (all ((1 ==) . length)) get
+    isSolved = gets (all ((1 ==) . length))
 
 groups :: [[MatrixIndex]]
 groups = rows ++ columns ++ cells
