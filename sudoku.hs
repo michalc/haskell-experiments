@@ -50,7 +50,7 @@ groups = rows ++ columns ++ cells
     cells = concatMap (map concat . chunksOf 3) $ transpose $ map (chunksOf 3) columns
 
 reducePotentials :: [[SudokuValue]] -> [[SudokuValue]]
-reducePotentials subMatrix = map (withoutPotential) subMatrix 
+reducePotentials subMatrix = map withoutPotential subMatrix 
   where
     withoutPotential [x] = [x]
     withoutPotential  xs = xs \\ [x | [x] <- subMatrix]
