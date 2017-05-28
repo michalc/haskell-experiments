@@ -34,7 +34,7 @@ main = putStrLn $ niceString $ execState iteration $ map toPotential initial
 niceString :: [[SudokuValue]] -> String
 niceString matrix = intercalate "\n" $ chunksOf 18 asStrings
   where
-    asStrings = intercalate " " $ map (show . head) matrix
+    asStrings = unwords $ map (show . head) matrix
 
 iteration :: State [[SudokuValue]] ()
 iteration = flip untilM_ isSolved $ mapM_ iterationGroup groups
