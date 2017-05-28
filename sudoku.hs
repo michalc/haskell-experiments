@@ -4,8 +4,6 @@ import Control.Monad.State.Strict
 import Data.List
 import Data.List.Split
 
-type GridState = [[Int]]
-
 initial = [
     Nothing, Nothing,  Just 3,   Nothing, Nothing,  Just 7,    Just 1, Nothing, Nothing,
     Nothing,  Just 4,  Just 1,   Nothing,  Just 2, Nothing,   Nothing, Nothing,  Just 5,
@@ -20,8 +18,6 @@ initial = [
     Nothing, Nothing,  Just 5,    Just 9, Nothing, Nothing,    Just 4, Nothing, Nothing
   ]
 
-
-
 main :: IO ()
 main = putStrLn $ niceString $ snd $ runState iteration $ map toPotential initial
   where
@@ -33,7 +29,7 @@ niceString matrix = intercalate "\n" $ chunksOf 18 asStrings
   where
     asStrings = intercalate " " $ map (show . head) matrix
 
-iteration :: State GridState ()
+iteration :: State [[Int]] ()
 iteration = flip untilM_ isSolved $ mapM_ iterationGroup groups
   where
     iterationGroup matrix = partsOf (traversed . indices (`elem` is)) %= reducePotentials
