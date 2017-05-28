@@ -28,11 +28,9 @@ initial = [
 main :: IO ()
 main = putStrLn $ niceString $ execState iteration $ map toPotential initial
   where
+    niceString = intercalate "\n" . (chunksOf 18) . unwords . map (show . head)
     toPotential Nothing  = [S1 ..]
     toPotential (Just x) = [x]
-
-niceString :: [[SudokuValue]] -> String
-niceString = intercalate "\n" . (chunksOf 18) . unwords . map (show . head)
 
 iteration :: State [[SudokuValue]] ()
 iteration = flip untilM_ isSolved $ mapM_ iterationGroup groups
