@@ -3,28 +3,32 @@ import Control.Monad.Loops
 import Control.Monad.State.Strict
 import Data.List
 import Data.List.Split
+import Data.Maybe
 
-type SudokuValue = Int
+data SudokuValue = S1 | S2 | S3 | S4 | S5 | S6 | S7 | S8 | S9 deriving (Eq, Enum)
+instance Show SudokuValue where
+  show s = show $ (fromJust (s `elemIndex` [S1 ..])) + 1
+
 type MatrixIndex = Int
 
 initial = [
-    Nothing, Nothing,  Just 3,   Nothing, Nothing,  Just 7,    Just 1, Nothing, Nothing,
-    Nothing,  Just 4,  Just 1,   Nothing,  Just 2, Nothing,   Nothing, Nothing,  Just 5,
-     Just 9, Nothing,  Just 6,   Nothing,  Just 5,  Just 1,    Just 2,  Just 3, Nothing,
+    Nothing, Nothing, Just S3,   Nothing, Nothing, Just S7,   Just S1, Nothing, Nothing,
+    Nothing, Just S4, Just S1,   Nothing, Just S2, Nothing,   Nothing, Nothing, Just S5,
+    Just S9, Nothing, Just S6,   Nothing, Just S5, Just S1,   Just S2, Just S3, Nothing,
 
-     Just 6, Nothing, Nothing,    Just 5,  Just 8, Nothing,    Just 9, Nothing, Nothing,
-    Nothing, Nothing,  Just 8,   Nothing, Nothing, Nothing,    Just 7, Nothing, Nothing,
-    Nothing, Nothing,  Just 2,   Nothing,  Just 4,  Just 9,   Nothing, Nothing,  Just 6,
+    Just S6, Nothing, Nothing,   Just S5, Just S8, Nothing,   Just S9, Nothing, Nothing,
+    Nothing, Nothing, Just S8,   Nothing, Nothing, Nothing,   Just S7, Nothing, Nothing,
+    Nothing, Nothing, Just S2,   Nothing, Just S4, Just S9,   Nothing, Nothing, Just S6,
 
-    Nothing,  Just 2,  Just 9,    Just 8,  Just 7, Nothing,    Just 3, Nothing,  Just 1,
-     Just 8, Nothing, Nothing,   Nothing,  Just 6, Nothing,    Just 5, Nothing, Nothing,
-    Nothing, Nothing,  Just 5,    Just 9, Nothing, Nothing,    Just 4, Nothing, Nothing
+    Nothing, Just S2, Just S9,   Just S8, Just S7, Nothing,   Just S3, Nothing, Just S1,
+    Just S8, Nothing, Nothing,   Nothing, Just S6, Nothing,   Just S5, Nothing, Nothing,
+    Nothing, Nothing, Just S5,   Just S9, Nothing, Nothing,   Just S4, Nothing, Nothing
   ]
 
 main :: IO ()
 main = putStrLn $ niceString $ snd $ runState iteration $ map toPotential initial
   where
-    toPotential Nothing  = [1..9]
+    toPotential Nothing  = [S1, S2, S3, S4, S5, S6, S7, S8, S9]
     toPotential (Just x) = [x]
 
 niceString :: [[SudokuValue]] -> String
