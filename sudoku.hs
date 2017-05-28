@@ -36,6 +36,7 @@ niceString matrix = intercalate "\n" $ chunksOf 18 asStrings
 iteration :: State GridState ()
 iteration = flip untilM_ isSolved $ mapM_ iterationGroup groups
   where
+    iterationGroup matrix = partsOf (traversed . indices (`elem` is)) %= reducePotentials
     isSolved = get >>= return . all (((==) 1) . length)
 
 groups :: [[Int]]
@@ -44,9 +45,6 @@ groups = rows ++ columns ++ cells
     rows = chunksOf 9 [0..80]
     columns = transpose rows
     cells = concatMap (map concat . chunksOf 3) $ transpose $ map (chunksOf 3) columns
-
-iterationGroup :: [Int] -> State GridState ()
-iterationGroup is = partsOf (traversed . indices (`elem` is)) %= reducePotentials
 
 reducePotentials :: (Eq a) => [[a]] -> [[a]]
 reducePotentials subMatrix = map (withoutPotential) subMatrix 
