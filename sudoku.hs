@@ -33,7 +33,7 @@ main = putStrLn $ niceString $ execState iteration $ map toPotential initial
     toPotential (Just x) = [x]
 
 iteration :: State [[SudokuValue]] ()
-iteration = flip untilM_ isSolved groupTransforms
+iteration = untilM_ groupTransforms isSolved
   where
     isSolved = gets (all ((1 ==) . length))
 
