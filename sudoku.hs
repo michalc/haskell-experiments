@@ -33,7 +33,7 @@ main = putStrLn $ niceString $ execState iteration $ map toPotential initial
     toPotential (Just x) = [x]
 
 iteration :: State [[SudokuValue]] ()
-iteration = flip untilM_ isSolved $ sequence_ groupTransforms
+iteration = flip untilM_ isSolved $ groupTransforms
   where
     isSolved = gets (all ((1 ==) . length))
 
@@ -44,8 +44,8 @@ groups = rows ++ columns ++ cells
     columns = transpose rows
     cells = concatMap (map concat . chunksOf 3) $ transpose $ map (chunksOf 3) columns
 
-groupTransforms :: [State [[SudokuValue]] ()]
-groupTransforms = map groupTransform groups
+groupTransforms :: State [[SudokuValue]] ()
+groupTransforms = sequence_ $ map groupTransform groups
   where
     groupTransform group = partsOf (traversed . indices (`elem` group)) %= reducePotentials
 
