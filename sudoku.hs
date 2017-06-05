@@ -26,16 +26,21 @@ initial = [
   ]
 
 main :: IO ()
-main = putStrLn $ niceString $ execState iteration $ map toPotential initial
+main = putStrLn $ niceString $ execState (untilStable groupTransforms) $ map toPotential initial
   where
-    niceString = intercalate "\n" . (chunksOf 18) . unwords . map (show . head)
+    niceString s
+      | isSolved s = intercalate "\n" $ (chunksOf 18) $ unwords $ map (show . head) s
+      | otherwise  = "Not solveable"
+    isSolved = all ((1 ==) . length)
     toPotential Nothing  = [S1 ..]
     toPotential (Just x) = [x]
 
-iteration :: State [[SudokuValue]] ()
-iteration = untilM_ groupTransforms isSolved
-  where
-    isSolved = gets (all ((1 ==) . length))
+untilStable :: Eq a => State a () -> State a ()
+untilStable state = do
+  before <- get
+  state
+  after <- get
+  unless (before == after) $ untilStable state
 
 groups :: [[MatrixIndex]]
 groups = rows ++ columns ++ cells
