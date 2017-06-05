@@ -45,7 +45,7 @@ groups = rows ++ columns ++ cells
     cells = concatMap (map concat . chunksOf 3) $ transpose $ map (chunksOf 3) columns
 
 groupTransforms :: State [[SudokuValue]] ()
-groupTransforms = sequence_ $ map groupTransform groups
+groupTransforms = mapM_ groupTransform groups
   where
     groupTransform group = partsOf (traversed . indices (`elem` group)) %= reducePotentials
 
