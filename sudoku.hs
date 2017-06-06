@@ -26,7 +26,7 @@ initial = [
   ]
 
 main :: IO ()
-main = putStrLn $ niceString $ execState (untilStable groupTransforms) $ map toPotential initial
+main = putStrLn $ niceString $ untilStable (execState groupTransforms) $ map toPotential initial
   where
     niceString s
       | isSolved s = intercalate "\n" $ (chunksOf 18) $ unwords $ map (show . head) s
@@ -35,12 +35,8 @@ main = putStrLn $ niceString $ execState (untilStable groupTransforms) $ map toP
     toPotential Nothing  = [S1 ..]
     toPotential (Just x) = [x]
 
-untilStable :: Eq a => State a () -> State a ()
-untilStable state = do
-  before <- get
-  state
-  after <- get
-  unless (before == after) $ untilStable state
+untilStable :: Eq a => (a -> a) -> a -> a
+untilStable = until =<< ((==) =<<)
 
 groups :: [[MatrixIndex]]
 groups = rows ++ columns ++ cells
