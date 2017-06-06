@@ -36,7 +36,10 @@ main = putStrLn $ niceString $ untilStable (execState groupTransforms) $ map toP
     toPotential (Just x) = [x]
 
 untilStable :: Eq a => (a -> a) -> a -> a
-untilStable = until =<< ((==) =<<)
+untilStable f a
+  | a' == a   = a
+  | otherwise = untilStable f a'
+  where a' = f a
 
 groups :: [[MatrixIndex]]
 groups = rows ++ columns ++ cells
