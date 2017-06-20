@@ -57,4 +57,5 @@ reducePotentials :: [[SudokuValue]] -> [[SudokuValue]]
 reducePotentials subMatrix = map withoutPotential subMatrix 
   where
     withoutPotential [x] = [x]
-    withoutPotential  xs = xs \\ [x | [x] <- subMatrix]
+    withoutPotential  xs = xs \\ certainties
+    certainties          = subMatrix >>= \x -> case x of [x] -> [x] ; _ -> []
