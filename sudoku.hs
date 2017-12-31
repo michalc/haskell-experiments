@@ -70,4 +70,4 @@ toPotentials :: SudokuValue -> Potentials
 toPotentials = bit . fromEnum
 
 toSudokuValue :: Potentials -> SudokuValue
-toSudokuValue x = toEnum $ countTrailingZeros x
+toSudokuValue x = toEnum $ popCount $ x-1
