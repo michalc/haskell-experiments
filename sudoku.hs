@@ -25,6 +25,10 @@ initial = [
     Nothing, Nothing, Just S5,   Just S9, Nothing, Nothing,   Just S4, Nothing, Nothing
   ]
 
+-- Sudoku solver, solving a hard-coded initial grid
+-- Creates a matrix of lists, each a list of "potential", values for each cell.
+-- Then iteratively removes potentials from each row, column, and 3x3 cell
+-- until the the removal process doesn't remove anything
 main :: IO ()
 main = putStrLn $ niceString $ untilStable (execState groupTransforms) $ map toPotential initial
   where
@@ -35,24 +39,29 @@ main = putStrLn $ niceString $ untilStable (execState groupTransforms) $ map toP
     toPotential Nothing  = [S1 ..]
     toPotential (Just x) = [x]
 
+-- Repeatedly applies the passed function until it does not change its input
 untilStable :: Eq a => (a -> a) -> a -> a
 untilStable f a
   | a' == a   = a
   | otherwise = untilStable f a'
   where a' = f a
 
-groups :: [[MatrixIndex]]
-groups = rows ++ columns ++ cells
+-- Lists of each index in each sudoku "group", i.e. each row, column or 3x3 cell
+sudokuGroups :: [[MatrixIndex]]
+sudokuGroups = rows ++ columns ++ cells
   where
     rows = chunksOf 9 [0..80]
     columns = transpose rows
     cells = concatMap (map concat . chunksOf 3) $ transpose $ map (chunksOf 3) columns
 
+-- State transform running one iteration of reducePotentials for each sudokuGroup
 groupTransforms :: State [[SudokuValue]] ()
-groupTransforms = mapM_ groupTransform groups
+groupTransforms = mapM_ groupTransform sudokuGroups
   where
     groupTransform group = partsOf (traversed . indices (`elem` group)) %= reducePotentials
 
+-- For each "certainty" in the lists passed (i.e. list of single value)
+-- removes this "certainly" from the other lists
 reducePotentials :: [[SudokuValue]] -> [[SudokuValue]]
 reducePotentials subMatrix = map withoutPotential subMatrix 
   where
